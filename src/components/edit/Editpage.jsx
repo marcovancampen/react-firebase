@@ -8,7 +8,6 @@ import {
 } from "firebase/auth";
 import { auth, db } from "../../firebase-config";
 import { Link } from "react-router-dom";
-import { Routes, Switch, Route } from "react-router-dom";
 import {
   doc,
   getDoc,
@@ -20,30 +19,23 @@ import {
 } from "firebase/firestore";
 import "../../App.css";
 
-const Twitter = () => {
+const Editpage = () => {
   const [user, setUser] = useState({});
-  const [tweets, setTweets] = useState([]);
   const [newTweet, setNewTweet] = useState("");
-
-  // Push Function
+  const [tweets, setTweets] = useState([]);
   onAuthStateChanged(auth, (currentUser) => {
     setUser(currentUser);
   });
-
-  const push = async () => {
+  const edit = async (postId) => {
     await addDoc(collection(db, "posts"), {
       post: newTweet,
       email: user.email,
     });
-    window.location.reload();
-  };
-
-  const deletePost = async (postId) => {
     console.log(postId);
     await deleteDoc(doc(db, "posts", postId));
+
     window.location.reload();
   };
-
   const getData = async () => {
     const querySnapshot = await getDocs(collection(db, "posts"));
 
@@ -59,36 +51,20 @@ const Twitter = () => {
   useEffect(() => {
     getData();
   }, []);
-
   return (
     <div className="app">
-      <input
-        type="text"
-        onChange={(event) => {
-          setNewTweet(event.target.value);
-        }}
-      ></input>
-      <button onClick={push}>Tweet</button>
       {tweets.map((tweet, counter) => {
+        console.log(tweet);
         return (
           <div key={counter}>
-            <input type="text" defaultValue={tweet.post} readOnly></input>
-            {user ? (
-              <>
-                {" "}
-                <button
-                  className="btn btn-success"
-                  onClick={() => deletePost(tweet.id)}
-                >
-                  delete
-                </button>
-                <Link to="/Editpage" className="btn btn-primary">
-                  Edit
-                </Link>
-              </>
-            ) : (
-              <></>
-            )}
+            <input
+              type="text"
+              defaultValue={tweet.post}
+              onChange={(event) => {
+                setNewTweet(event.target.value);
+              }}
+            ></input>
+            <button onClick={() => edit(tweet.id)}>edit</button>
           </div>
         );
       })}
@@ -96,4 +72,4 @@ const Twitter = () => {
   );
 };
 
-export default Twitter;
+export default Editpage;
